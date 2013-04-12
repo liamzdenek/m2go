@@ -70,11 +70,12 @@ func (conn *M2Connection) parse(msg string) *Request {
     }
      
     return &Request{
-        sender:  splitdata[0],
-        conn_id: splitdata[1],
-        path:    splitdata[2],
-        body:    body,
-        headers: headerary,
+        sender_id: splitdata[0],
+        conn_id:   splitdata[1],
+        path:      splitdata[2],
+        body:      body,
+        conn:      conn,
+        headers:   headerary,
     };
 }
 
