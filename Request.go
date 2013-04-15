@@ -8,11 +8,7 @@ type Request struct {
     path string;
     body string;
     conn *M2Connection;
-    headers []Header; 
-}
-
-func (req *Request) reply_http(body string) {
-    
+    headers []Header;
 }
 
 func (req *Request) reply(msg string) {
