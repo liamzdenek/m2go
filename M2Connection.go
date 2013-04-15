@@ -1,6 +1,5 @@
 package main
 
-import "fmt";
 import "strings";
 import zmq "github.com/alecthomas/gozmq";
 import "strconv";
@@ -11,7 +10,7 @@ type M2Connection struct
     ctx *zmq.Context;
     req *zmq.Socket;
     rsp *zmq.Socket;
-    
+
     sender_id string;
 }
 
@@ -21,9 +20,9 @@ func NewM2Connection(sender_id string, req_addr string, rsp_addr string) *M2Conn
     rsp, _ := ctx.NewSocket(zmq.PUB);
     req.Connect(req_addr);
     rsp.Connect(rsp_addr);
-    req.SetSockOptInt(zmq.RCVTIMEO, 1000);
+    //req.SetSockOptInt(zmq.RCVTIMEO, 1000);
     rsp.SetSockOptString(zmq.IDENTITY, sender_id);
-    
+
     return &M2Connection{
         ctx:ctx,
         req:req,
@@ -46,29 +45,30 @@ func (conn *M2Connection) parse(msg string) *Request {
     splitdata := strings.SplitN(msg, " ", 4);
     headers, rest := conn.parse_netstring(splitdata[3]);
     body, _ := conn.parse_netstring(rest);
-    
-    headers = headers[1:len(headers)-1];
-    regex, err := regexp.Compile(`"(.*)"\:"(.*)"`);
-    
-    if err != nil {
-        fmt.Printf("Regexp Error: %s", err);
-    }
 
-    headerary := make([]Header,0);
-    
+    // we're not going to break out a JSON parser. DIY. For speed.
+    headers = headers[1:len(headers)-1];
+    regex,_ := regexp.Compile(`"(.*)"\:"(.*)"`);
+
+    // precalculate header array size. this might accidentally
+    // overshoot in size, but whatever.
+    headerary := make([]Header,strings.Count(headers,"\":\""));
+
+    var parts, headstring []string;
     for {
-        splitdata := strings.SplitN(headers,",", 2);
-        if len(splitdata) == 1 {
+        headstring = strings.SplitN(headers,",", 2);
+        if len(headstring) == 1 {
             break;
         }
-        
-        headers = string(splitdata[1]);
-        parts := regex.FindStringSubmatch(splitdata[0]);
+
+        headers = headstring[1];
+        // this could be replaced with sscanf. it should perform faster
+        parts = regex.FindStringSubmatch(headstring[0]);
         if len(parts) == 3 {
-            headerary = append(headerary, Header{key:string(parts[1]),value:string(parts[2])} ); 
+            headerary = append(headerary, Header{key:string(parts[1]),value:string(parts[2])} );
         }
     }
-     
+
     return &Request{
         sender_id: splitdata[0],
         conn_id:   splitdata[1],
@@ -83,5 +83,5 @@ func (con *M2Connection) parse_netstring(ns string) (string, string) {
     // length, rest
     splitdata := strings.SplitN(ns, ":", 2);
     datalen,_ := strconv.Atoi(splitdata[0]);
-    return splitdata[1][:datalen], splitdata[1][datalen+1:] 
+    return splitdata[1][:datalen], splitdata[1][datalen+1:];
 }
