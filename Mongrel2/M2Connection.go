@@ -1,4 +1,4 @@
-package main
+package m2go
 
 import "strings";
 import zmq "github.com/alecthomas/gozmq";
@@ -31,16 +31,16 @@ func NewM2Connection(sender_id string, req_addr string, rsp_addr string) *M2Conn
     };
 }
 
-func (conn *M2Connection) poll() (*Request) {
+func (conn *M2Connection) Poll() (*Request) {
     msg, err := conn.req.Recv(0);
     if err == nil {
-        parsed := conn.parse(string(msg));
+        parsed := conn.Parse(string(msg));
         return parsed;
     }
     return nil;
 }
 
-func (conn *M2Connection) parse(msg string) *Request {
+func (conn *M2Connection) Parse(msg string) *Request {
     //sender, conn_id, path, rest
     splitdata := strings.SplitN(msg, " ", 4);
     headers, rest := conn.parse_netstring(splitdata[3]);

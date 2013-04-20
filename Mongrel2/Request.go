@@ -1,4 +1,4 @@
-package main;
+package m2go;
 
 import "fmt";
 
@@ -11,7 +11,7 @@ type Request struct {
     headers []Header;
 }
 
-func (req *Request) reply(msg string) {
+func (req *Request) Reply(msg string) {
     conn := req.conn;
     rsp  := conn.rsp;
     response := fmt.Sprintf(
