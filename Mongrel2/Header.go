@@ -1,4 +1,4 @@
-package main;
+package m2go;
 
 type Header struct {
     key string;
