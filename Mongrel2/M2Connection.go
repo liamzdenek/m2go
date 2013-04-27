@@ -7,32 +7,32 @@ import "regexp";
 
 type M2Connection struct
 {
-    ctx *zmq.Context;
-    req *zmq.Socket;
-    rsp *zmq.Socket;
+    Ctx *zmq.Context;
+    Req *zmq.Socket;
+    Rsp *zmq.Socket;
 
-    sender_id string;
+    SenderId string;
 }
 
-func NewM2Connection(sender_id string, req_addr string, rsp_addr string) *M2Connection {
-    ctx, _ := zmq.NewContext();
-    req, _ := ctx.NewSocket(zmq.PULL);
-    rsp, _ := ctx.NewSocket(zmq.PUB);
-    req.Connect(req_addr);
-    rsp.Connect(rsp_addr);
+func NewM2Connection(SenderId string, req_addr string, rsp_addr string) *M2Connection {
+    Ctx, _ := zmq.NewContext();
+    Req, _ := Ctx.NewSocket(zmq.PULL);
+    Rsp, _ := Ctx.NewSocket(zmq.PUB);
+    Req.Connect(req_addr);
+    Rsp.Connect(rsp_addr);
     //req.SetSockOptInt(zmq.RCVTIMEO, 1000);
-    rsp.SetSockOptString(zmq.IDENTITY, sender_id);
+    Rsp.SetSockOptString(zmq.IDENTITY, SenderId);
 
     return &M2Connection{
-        ctx:ctx,
-        req:req,
-        rsp:rsp,
-        sender_id:sender_id,
+        Ctx:Ctx,
+        Req:Req,
+        Rsp:Rsp,
+        SenderId:SenderId,
     };
 }
 
 func (conn *M2Connection) Poll() (*Request) {
-    msg, err := conn.req.Recv(0);
+    msg, err := conn.Req.Recv(0);
     if err == nil {
         parsed := conn.Parse(string(msg));
         return parsed;
@@ -70,12 +70,12 @@ func (conn *M2Connection) Parse(msg string) *Request {
     }
 
     return &Request{
-        sender_id: splitdata[0],
-        conn_id:   splitdata[1],
-        path:      splitdata[2],
-        body:      body,
-        conn:      conn,
-        headers:   headerary,
+        SenderId: splitdata[0],
+        ConnId:   splitdata[1],
+        Path:      splitdata[2],
+        Body:      body,
+        Conn:      conn,
+        Headers:   headerary,
     };
 }
 
