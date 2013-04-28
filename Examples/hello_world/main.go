@@ -1,20 +1,45 @@
 package main
 
 import "fmt";
-import "../../Mongrel2";
+import "regexp";
+import "bytes";
+import "../../Mongrel2/";
 
 func main() {
-    conn := *m2go.NewM2Connection("82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
+    r := m2go.Router{};
 
-    var req *m2go.Request;
-    for {
-        req = conn.Poll();
-        if req != nil {
-            response := m2go.Response{};
-            response.Body = "Hello, World!";
-            fmt.Printf("replying: %s\n", response.String());
-            req.Reply(response.String());
-        }
-    }
+    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/$`),     Handler:SayHello});
+    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/([[:alpha:]]*)$`),Handler:SayHelloWithName});
+    r.NotFound = ErrorNotFound;
+
+    conn := *m2go.NewM2Connection(r,"82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
+    conn.StartServer();
 }
 
+func SayHello(r *m2go.Request) {
+    response := m2go.Response{};
+    response.Body = "Hello, World!";
+    r.Reply(response.String());
+}
+
+func SayHelloWithName(r *m2go.Request) {
+    var buffer bytes.Buffer;
+
+    buffer.WriteString(fmt.Sprintf("Hello, %s!", r.URLArgs[0][1]));
+
+    response := m2go.Response{};
+    response.Body = buffer.String();
+    response.ContentType = "text.plain";
+
+    r.Reply(response.String());
+}
+
+func ErrorNotFound(r *m2go.Request) {
+    fmt.Printf("error not found\n");
+    response := m2go.Response{};
+    response.Body = "The document you are looking for cannot be found\n";
+    response.ContentType = "text/plain";
+    response.StatusCode = "404";
+    response.Status = "Not Found";
+    r.Reply(response.String());
+}

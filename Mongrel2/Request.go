@@ -9,6 +9,7 @@ type Request struct {
     Body string;
     Conn *M2Connection;
     Headers []Header;
+    URLArgs [][]string;
 }
 
 func (req *Request) Reply(msg string) {

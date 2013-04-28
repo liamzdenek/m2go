@@ -11,10 +11,11 @@ type M2Connection struct
     Req *zmq.Socket;
     Rsp *zmq.Socket;
 
+    Router Router;
     SenderId string;
 }
 
-func NewM2Connection(SenderId string, req_addr string, rsp_addr string) *M2Connection {
+func NewM2Connection(Router Router, SenderId string, req_addr string, rsp_addr string) *M2Connection {
     Ctx, _ := zmq.NewContext();
     Req, _ := Ctx.NewSocket(zmq.PULL);
     Rsp, _ := Ctx.NewSocket(zmq.PUB);
@@ -27,8 +28,19 @@ func NewM2Connection(SenderId string, req_addr string, rsp_addr string) *M2Conne
         Ctx:Ctx,
         Req:Req,
         Rsp:Rsp,
+        Router:Router,
         SenderId:SenderId,
     };
+}
+
+func (conn *M2Connection) StartServer() {
+    var req *Request;
+    for {
+        req = conn.Poll();
+        if req != nil {
+            go conn.Router.Handle(req);
+        }
+    }
 }
 
 func (conn *M2Connection) Poll() (*Request) {
