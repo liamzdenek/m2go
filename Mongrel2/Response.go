@@ -8,6 +8,7 @@ type Response struct {
     Body string;
     StatusCode string; // "200"
     Status string;     // "OK"
+    ContentType string;
 }
 
 func (response Response) String() string {
@@ -26,6 +27,8 @@ func (response Response) String() string {
     for n, _ := range response.Headers {
         buffer.WriteString(fmt.Sprintf("%s: %s\r\n", response.Headers[n].key, response.Headers[n].value));
     }
+
+    buffer.WriteString(fmt.Sprintf("Content-Type: %s\r\n", response.ContentType));
 
     buffer.WriteString(fmt.Sprintf("Content-Length: %d\r\n\r\n%s",len(response.Body),response.Body));
 
