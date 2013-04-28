@@ -29,7 +29,7 @@ func SayHelloWithName(r *m2go.Request) {
 
     response := m2go.Response{};
     response.Body = buffer.String();
-    response.ContentType = "text.plain";
+    response.ContentType = "text/plain";
 
     r.Reply(response.String());
 }
