@@ -1,7 +1,5 @@
 package m2go;
 
-import "fmt";
-
 type Router struct {
      Routes []Route;
      NotFound func(*Request);
