@@ -11,7 +11,6 @@ func (r *Router) Handle(req *Request) {
     for i,_ := range r.Routes {
         if r.Routes[i].Path.MatchString(req.Path) {
             matches := r.Routes[i].Path.FindAllStringSubmatch(req.Path,-1);
-            fmt.Printf("matches: %v\n", matches);
             req.URLArgs = matches;
             r.Routes[i].Handler(req);
             return;
