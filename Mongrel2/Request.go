@@ -7,7 +7,7 @@ type Request struct {
     ConnId string;
     Path string;
     Body string;
-    Conn *M2Connection;
+    Conn *Connection;
     Headers []Header;
     URLArgs [][]string;
 }
