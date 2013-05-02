@@ -6,29 +6,31 @@ import "bytes";
 type Response struct {
     Headers []Header;
     Body string;
-    StatusCode string; // "200"
-    Status string;     // "OK"
+    StatusCode int; // "200"
+    Status string;  // "OK"
     ContentType string;
 }
 
 func (response Response) String() string {
     var buffer bytes.Buffer;
 
-    if len(response.StatusCode) == 0 {
-        response.StatusCode = "200";
+    if response.StatusCode == 0 {
+        response.StatusCode = 200;
     }
 
     if len(response.Status) == 0 {
         response.Status = "OK";
     }
 
-    buffer.WriteString(fmt.Sprintf("HTTP/1.0 %s %s\r\n", response.StatusCode, response.Status));
+    buffer.WriteString(fmt.Sprintf("HTTP/1.0 %d %s\r\n", response.StatusCode, response.Status));
 
     for n, _ := range response.Headers {
         buffer.WriteString(fmt.Sprintf("%s: %s\r\n", response.Headers[n].key, response.Headers[n].value));
     }
 
-    buffer.WriteString(fmt.Sprintf("Content-Type: %s\r\n", response.ContentType));
+    if len(response.ContentType) != 0 {
+        buffer.WriteString(fmt.Sprintf("Content-Type: %s\r\n", response.ContentType));
+    }
 
     buffer.WriteString(fmt.Sprintf("Content-Length: %d\r\n\r\n%s",len(response.Body),response.Body));
 

@@ -8,11 +8,11 @@ import "../../Mongrel2/";
 func main() {
     r := m2go.Router{};
 
-    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/$`),     Handler:SayHello});
+    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/$`),Handler:SayHello});
     r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/([[:alpha:]]*)$`),Handler:SayHelloWithName});
     r.NotFound = ErrorNotFound;
 
-    conn := *m2go.NewM2Connection(r,"82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
+    conn := *m2go.NewConnection(r,"82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
     conn.StartServer();
 }
 
@@ -35,11 +35,10 @@ func SayHelloWithName(r *m2go.Request) {
 }
 
 func ErrorNotFound(r *m2go.Request) {
-    fmt.Printf("error not found\n");
     response := m2go.Response{};
     response.Body = "The document you are looking for cannot be found\n";
     response.ContentType = "text/plain";
-    response.StatusCode = "404";
+    response.StatusCode = 404;
     response.Status = "Not Found";
     r.Reply(response.String());
 }
