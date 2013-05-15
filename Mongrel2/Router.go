@@ -5,6 +5,10 @@ type Router struct {
      NotFound func(*Request);
 };
 
+func NewRouter() *Router {
+    return &Router{};
+}
+
 func (r *Router) Handle(req *Request) {
     for i,_ := range r.Routes {
         if r.Routes[i].Path.MatchString(req.Path) {

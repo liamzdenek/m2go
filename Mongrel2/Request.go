@@ -24,3 +24,8 @@ func (req *Request) Reply(msg string) {
     //fmt.Printf("Response: %s\n", response);
     rsp.Send([]byte(response),0);
 }
+
+func (req *Request) GetGroup(key string, engineid int) (bool,*SessionKeyGroup) {
+    sh := req.Conn.SessionHandler;
+    return sh.GetGroup(req, key, engineid);
+}
