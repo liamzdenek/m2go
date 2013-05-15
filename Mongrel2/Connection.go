@@ -11,11 +11,12 @@ type Connection struct
     Req *zmq.Socket;
     Rsp *zmq.Socket;
 
-    Router Router;
+    SessionHandler *SessionHandler;
+    Router *Router;
     SenderId string;
 }
 
-func NewConnection(Router Router, SenderId string, req_addr string, rsp_addr string) *Connection {
+func NewConnection(Router *Router, sh *SessionHandler, SenderId string, req_addr string, rsp_addr string) *Connection {
     Ctx, _ := zmq.NewContext();
     Req, _ := Ctx.NewSocket(zmq.PULL);
     Rsp, _ := Ctx.NewSocket(zmq.PUB);
@@ -29,6 +30,7 @@ func NewConnection(Router Router, SenderId string, req_addr string, rsp_addr str
         Req:Req,
         Rsp:Rsp,
         Router:Router,
+        SessionHandler:sh,
         SenderId:SenderId,
     };
 }
@@ -40,15 +42,6 @@ func (conn *Connection) StartServer() {
             conn.Router.Handle(conn.Parse(string(msg)));
         }
     }
-}
-
-func (conn *Connection) Poll() (*Request) {
-    msg, err := conn.Req.Recv(0);
-    if err == nil {
-        parsed := conn.Parse(string(msg));
-        return parsed;
-    }
-    return nil;
 }
 
 func (conn *Connection) Parse(msg string) *Request {
