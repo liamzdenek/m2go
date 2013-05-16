@@ -12,10 +12,10 @@ type SessionEngineClientUnsecure struct {}
 func (se *SessionEngineClientUnsecure) Load(req *Request, key string) (bool, *SessionKeyGroup) {
     fmt.Printf("%s\n", "Load Client Unsecure");
     kg := NewSessionKeyGroup(key);
-    return true, kg;
+    return false, kg;
 }
 
 func (se *SessionEngineClientUnsecure) Save(res *Response, group *SessionKeyGroup, key string) bool {
     fmt.Printf("%s\n", "Save Client Unsecure");
-    return true;
+    return false;
 }
