@@ -14,24 +14,27 @@ Requirements
 Usage
 -----
 
+See Examples/hello_world/main.go for the full + latest version. I'm not the most reliable at ensuring that the README is up to date.
+
 ```go
 package main
 
 import "fmt";
-import "../../Mongrel2";
+import "regexp";
+import "bytes";
+import "../../Mongrel2/";
 
 func main() {
-    conn := *m2go.NewM2Connection("82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
+    r := m2go.Router{};
+    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/$`),Handler:SayHello});
 
-    var req *m2go.Request;
-    for {
-        req = conn.Poll();
-        if req != nil {
-            response := m2go.Response{};
-            response.Body = "Hello, World!";
-            fmt.Printf("replying: %s\n", response.String());
-            req.Reply(response.String());
-        }
-    }
+    conn := *m2go.NewConnection(r,nil,"82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
+    conn.StartServer();
+}
+
+func SayHello(r *m2go.Request) {
+    response := r.NewResponse();
+    response.Body = "Hello, World!";
+    r.Reply(response.String());
 }
 ```

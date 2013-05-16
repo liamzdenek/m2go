@@ -12,7 +12,7 @@ func main() {
     r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/([[:alpha:]]*)$`),Handler:SayHelloWithName});
     r.NotFound = ErrorNotFound;
 
-    conn := *m2go.NewConnection(r,"82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
+    conn := *m2go.NewConnection(r,nil,"82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
     conn.StartServer();
 }
 
