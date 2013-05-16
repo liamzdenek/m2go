@@ -2,6 +2,7 @@ package m2go;
 
 type SessionKeyGroup struct {
     Key   string;
+    EngineId int;
     Pairs map[string]string;
     delta []string;
 }

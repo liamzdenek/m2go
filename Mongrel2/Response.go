@@ -4,6 +4,7 @@ import "fmt";
 import "bytes";
 
 type Response struct {
+    Request *Request;
     Headers []Header;
     Body string;
     StatusCode int; // "200"
@@ -20,6 +21,10 @@ func (response Response) String() string {
 
     if len(response.Status) == 0 {
         response.Status = "OK";
+    }
+
+    if nil != response.Request.Conn.SessionHandler {
+        response.Request.Conn.SessionHandler.SaveGroups(&response);
     }
 
     buffer.WriteString(fmt.Sprintf("HTTP/1.0 %d %s\r\n", response.StatusCode, response.Status));

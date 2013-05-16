@@ -39,7 +39,7 @@ func SayHelloWithName(r *m2go.Request) {
 
     buffer.WriteString(fmt.Sprintf("Hello, %s!", r.URLArgs[0][1]));
 
-    response := m2go.Response{};
+    response := r.GetResponse();
     response.Body = buffer.String();
     response.ContentType = "text/plain";
 
