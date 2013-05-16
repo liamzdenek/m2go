@@ -21,7 +21,6 @@ package main
 
 import "fmt";
 import "regexp";
-import "bytes";
 import "../../Mongrel2/";
 
 func main() {
