@@ -25,7 +25,7 @@ func main() {
 }
 
 func SayHello(r *m2go.Request) {
-    response := m2go.Response{};
+    response := r.GetResponse();
     response.Body = "Hello, World!";
     r.Reply(response.String());
 }
@@ -47,7 +47,7 @@ func SayHelloWithName(r *m2go.Request) {
 }
 
 func ErrorNotFound(r *m2go.Request) {
-    response := m2go.Response{};
+    response := r.GetResponse();
     response.Body = "The document you are looking for cannot be found\n";
     response.ContentType = "text/plain";
     response.StatusCode = 404;
