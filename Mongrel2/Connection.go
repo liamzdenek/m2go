@@ -2,7 +2,6 @@ package m2go
 
 import "strings";
 import zmq "github.com/alecthomas/gozmq";
-import "strconv";
 import "regexp";
 
 type Connection struct
@@ -47,8 +46,8 @@ func (conn *Connection) StartServer() {
 func (conn *Connection) Parse(msg string) *Request {
     //sender, conn_id, path, rest
     splitdata := strings.SplitN(msg, " ", 4);
-    headers, rest := conn.parse_netstring(splitdata[3]);
-    body, _ := conn.parse_netstring(rest);
+    headers, rest := Util_parse_netstring(splitdata[3]);
+    body, _ := Util_parse_netstring(rest);
 
     // we're not going to break out a JSON parser. DIY. For speed.
     headers = headers[1:len(headers)-1];
@@ -56,9 +55,10 @@ func (conn *Connection) Parse(msg string) *Request {
 
     // precalculate header array size. this might accidentally
     // overshoot in size, but whatever.
-    headerary := make([]Header,strings.Count(headers,"\":\""));
+    headerary := make([]Header,strings.Count(headers,"\":\"")-1);
 
     var parts, headstring []string;
+    var headercount int;
     for {
         headstring = strings.SplitN(headers,",", 2);
         if len(headstring) == 1 {
@@ -69,23 +69,12 @@ func (conn *Connection) Parse(msg string) *Request {
         // this could be replaced with sscanf. it should perform faster
         parts = regex.FindStringSubmatch(headstring[0]);
         if len(parts) == 3 {
-            headerary = append(headerary, Header{key:string(parts[1]),value:string(parts[2])} );
+            headerary[headercount] = Header{key:string(parts[1]),value:string(parts[2])};
+            headercount++;
         }
     }
 
-    return &Request{
-        SenderId: splitdata[0],
-        ConnId:   splitdata[1],
-        Path:      splitdata[2],
-        Body:      body,
-        Conn:      conn,
-        Headers:   headerary,
-    };
+    return NewRequest(*conn.SessionHandler, splitdata[0], splitdata[1], splitdata[2], body, conn, headerary);
 }
 
-func (con *Connection) parse_netstring(ns string) (string, string) {
-    // length, rest
-    splitdata := strings.SplitN(ns, ":", 2);
-    datalen,_ := strconv.Atoi(splitdata[0]);
-    return splitdata[1][:datalen], splitdata[1][datalen+1:];
-}
+

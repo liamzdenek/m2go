@@ -2,7 +2,6 @@ package main
 
 import "fmt";
 import "regexp";
-import "bytes";
 import "../../Mongrel2/";
 
 var ENGINE_CLIENT_UNSECURE = 0;
@@ -16,41 +15,86 @@ func main() {
 
     r := m2go.NewRouter();
 
-    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/$`),Handler:SayHello});
-    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/([[:alpha:]]*)$`),Handler:SayHelloWithName});
+    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/$`),Handler:ActionIndex});
+    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/login`),Handler:ActionLogin});
+    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/logout`),Handler:ActionLogout});
     r.NotFound = ErrorNotFound;
 
     conn := *m2go.NewConnection(r,sh,"82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
     conn.StartServer();
 }
 
-func SayHello(r *m2go.Request) {
-    response := r.GetResponse();
-    response.Body = "Hello, World!";
-    r.Reply(response.String());
+func GetLoginForm(prefix string) string {
+    return fmt.Sprintf(
+        "%s%s", 
+        prefix, 
+        "<form action=\"/login\" method=\"POST\">"+
+            "Username: <input name=\"username\"><br/>"+
+            "Password <input name=\"password\"><br/>"+
+            "<input value=\"Login\" type=\"submit\">"+
+        "</form>",
+    );
 }
 
-func SayHelloWithName(r *m2go.Request) {
-    var buffer bytes.Buffer;
+func ActionIndex(r *m2go.Request) {
+    rsp := r.GetResponse();
+    
+    err,kg := r.GetGroup("sess", ENGINE_CLIENT_UNSECURE);
 
-    _, kg := r.GetGroup("sess", ENGINE_CLIENT_UNSECURE);
+    if !err && len(kg.Get("username")) > 0 {
+        rsp.Body = fmt.Sprintf("<p>You are logged in as %s. <a href=\"/logout\">Logout</a></p>", kg.Get("username") );
+        rsp.Dispatch();
+    } else {
+        rsp.Body = GetLoginForm("");
+        rsp.Dispatch();
+    }
+}
 
-    kg.Set("username", r.URLArgs[0][1]);
+func ActionLogin(r *m2go.Request) {
+    request := m2go.Util_parse_str(r.Body);
 
-    buffer.WriteString(fmt.Sprintf("Hello, %s!", r.URLArgs[0][1]));
+    rsp := r.GetResponse();
+    if request["username"] == nil || request["password"] == nil {
+        rsp.Body = "You must POST a username and a password to /login";
+        rsp.StatusCode = 400;
+        rsp.Status = "Bad Request";
+        rsp.Dispatch();
+        return;
+    }
 
-    response := r.GetResponse();
-    response.Body = buffer.String();
-    response.ContentType = "text/plain";
+    username := request["username"][0];
+    password := request["password"][0];
 
-    r.Reply(response.String());
+    if password == "password" && len(username) > 0 {
+        rsp.Body = "<p>Successful Login</p>";
+        
+        _, group := r.GetGroup("sess", ENGINE_CLIENT_UNSECURE);
+        group.Set("username", username);
+
+        rsp.Dispatch();
+    } else {
+        rsp.Body = GetLoginForm("<p>Invalid username or password</p>");
+        rsp.Dispatch();
+    }
+
+    fmt.Printf("Username: %v, Password: %v\n", username, password); 
+}
+
+func ActionLogout(r *m2go.Request) {
+    res := r.GetResponse();
+
+    _, group := r.GetGroup("sess", ENGINE_CLIENT_UNSECURE);
+    group.Set("username", "");
+    
+    res.Body = GetLoginForm("");
+    res.Dispatch();
 }
 
 func ErrorNotFound(r *m2go.Request) {
-    response := r.GetResponse();
-    response.Body = "The document you are looking for cannot be found\n";
-    response.ContentType = "text/plain";
-    response.StatusCode = 404;
-    response.Status = "Not Found";
-    r.Reply(response.String());
+    res := r.GetResponse();
+    res.Body = "The document you are looking for cannot be found\n";
+    res.ContentType = "text/plain";
+    res.StatusCode = 404;
+    res.Status = "Not Found";
+    res.Dispatch();
 }
