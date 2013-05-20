@@ -27,13 +27,8 @@ func (group *SessionKeyGroup) Set(key string, value string) {
     group.Pairs[key] = value;
 }
 
-func (group *SessionKeyGroup) Get(key string) (bool,string) {
-    for k,_ := range group.Pairs {
-        if key == k {
-            return true, group.Pairs[k];
-        }
-    }
-    return false, "";
+func (group *SessionKeyGroup) Get(k string) string {
+    return group.Pairs[k];
 }
 
 // because delta is read-only
