@@ -59,10 +59,9 @@ func (conn *Connection) Parse(msg string) *Request {
 
     // precalculate header array size. this might accidentally
     // overshoot in size, but whatever.
-    headerary := make([]Header,strings.Count(headers,"\":\"")-1);
 
+    headerary := make(map[string][]string);
     var parts, headstring []string;
-    var headercount int;
     for {
         headstring = strings.SplitN(headers,",", 2);
         if len(headstring) == 1 {
@@ -73,8 +72,8 @@ func (conn *Connection) Parse(msg string) *Request {
         // this could be replaced with sscanf. it should perform faster
         parts = regex.FindStringSubmatch(headstring[0]);
         if len(parts) == 3 {
-            headerary[headercount] = Header{key:string(parts[1]),value:string(parts[2])};
-            headercount++;
+            key := parts[1];
+            headerary[key] = append(headerary[key], parts[2]);
         }
     }
 

@@ -14,7 +14,7 @@ func NewSessionKeyGroup(key string) *SessionKeyGroup {
     return kg;
 }
 
-func (group *SessionKeyGroup) Set(key string, value string) {
+func (group *SessionKeyGroup) Set(key, value string) {
     var found bool = false;
     for _, k := range group.delta {
         if k == key {

@@ -67,10 +67,20 @@ func ActionLogin(r *m2go.Request) {
 
     if password == "password" && len(username) > 0 {
         rsp.Body = "<p>Successful Login</p>";
+        err, group := r.GetGroup("sess", ENGINE_CLIENT_UNSECURE);
         
-        _, group := r.GetGroup("sess", ENGINE_CLIENT_UNSECURE);
-        group.Set("username", username);
+        if err {
+            rsp.Body = "There was an internal error logging you in";
+            rsp.StatusCode = 500;
+            rsp.Status = "Internal Error";
+            rsp.Dispatch();
+            return;
+        }
 
+        fmt.Printf("Group: %v\n", group);
+        
+        group.Set("username", username);
+        fmt.Printf("Dispatch\n");
         rsp.Dispatch();
     } else {
         rsp.Body = GetLoginForm("<p>Invalid username or password</p>");

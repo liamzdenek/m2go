@@ -5,11 +5,15 @@ import "bytes";
 
 type Response struct {
     Request *Request;
-    Headers []Header;
+    Headers map[string][]string;
     Body string;
     StatusCode int; // "200"
     Status string;  // "OK"
     ContentType string;
+}
+
+func NewResponse(req *Request) *Response {
+    return &Response{Request: req, StatusCode:200, Status:"OK", Headers: make(map[string][]string)};
 }
 
 // shortcut for `request.Reply(response.String());`
@@ -19,7 +23,7 @@ func (rsp Response) Dispatch() {
 }
 
 func (res *Response) AddHeader(key, value string) {
-    res.Headers = append(res.Headers, Header{key:key, value:value});
+    res.Headers[key] = append(res.Headers[key], value);
 }
 
 func (res *Response) String() string {
@@ -29,8 +33,10 @@ func (res *Response) String() string {
 
     buffer.WriteString(fmt.Sprintf("HTTP/1.0 %d %s\r\n", res.StatusCode, res.Status));
 
-    for n, _ := range res.Headers {
-        buffer.WriteString(fmt.Sprintf("%s: %s\r\n", res.Headers[n].key, res.Headers[n].value));
+    for k, values := range res.Headers {
+        for _,v := range values {
+            buffer.WriteString(fmt.Sprintf("%s: %s\r\n", k, v));
+        }
     }
 
     if len(res.ContentType) != 0 {

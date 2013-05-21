@@ -8,14 +8,14 @@ type Request struct {
     Path string;
     Body string;
     Conn *Connection;
-    Headers []Header;
+    Headers map[string][]string;
     URLArgs [][]string;
 
     SessionHandler *SessionHandler;
     LoadedGroups map[string]*SessionKeyGroup;
 }
 
-func NewRequest(sh *SessionHandler, SenderId, ConnId, Path, Body string, Conn *Connection, Headers []Header) *Request {
+func NewRequest(sh *SessionHandler, SenderId, ConnId, Path, Body string, Conn *Connection, Headers map[string][]string) *Request {
     return &Request{
         SenderId: SenderId,
         ConnId: ConnId,
@@ -43,7 +43,7 @@ func (req *Request) Reply(msg string) {
 }
 
 func (req *Request) GetResponse() *Response {
-    return &Response{ Request: req, StatusCode:200, Status:"OK" };
+    return NewResponse(req);
 }
 
 func (req *Request) GetGroup(key string, engineid int) (bool,*SessionKeyGroup) {
