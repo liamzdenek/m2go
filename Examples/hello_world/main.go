@@ -12,14 +12,15 @@ func main() {
     r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/([[:alpha:]]*)$`),Handler:SayHelloWithName});
     r.NotFound = ErrorNotFound;
 
-    conn := *m2go.NewConnection(r,nil,"82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
+    conn := *m2go.NewConnection(&r,nil,"82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
     conn.StartServer();
 }
 
 func SayHello(r *m2go.Request) {
-    response := r.NewResponse();
+    response := r.GetResponse();
     response.Body = "Hello, World!";
-    r.Reply(response.String());
+
+    response.Dispatch();
 }
 
 func SayHelloWithName(r *m2go.Request) {
@@ -27,18 +28,19 @@ func SayHelloWithName(r *m2go.Request) {
 
     buffer.WriteString(fmt.Sprintf("Hello, %s!", r.URLArgs[0][1]));
 
-    response := r.NewResponse();
+    response := r.GetResponse();
     response.Body = buffer.String();
     response.ContentType = "text/plain";
 
-    r.Reply(response.String());
+    response.Dispatch();
 }
 
 func ErrorNotFound(r *m2go.Request) {
-    response := r.NewResponse();
+    response := r.GetResponse();
     response.Body = "The document you are looking for cannot be found\n";
     response.ContentType = "text/plain";
     response.StatusCode = 404;
     response.Status = "Not Found";
-    r.Reply(response.String());
+
+    response.Dispatch();
 }

@@ -11,11 +11,11 @@ type Request struct {
     Headers []Header;
     URLArgs [][]string;
 
-    SessionHandler SessionHandler;
+    SessionHandler *SessionHandler;
     LoadedGroups map[string]*SessionKeyGroup;
 }
 
-func NewRequest(sh SessionHandler, SenderId string, ConnId string, Path string, Body string, Conn *Connection, Headers []Header) *Request {
+func NewRequest(sh *SessionHandler, SenderId, ConnId, Path, Body string, Conn *Connection, Headers []Header) *Request {
     return &Request{
         SenderId: SenderId,
         ConnId: ConnId,
@@ -25,7 +25,6 @@ func NewRequest(sh SessionHandler, SenderId string, ConnId string, Path string, 
         Headers: Headers,
 
         SessionHandler: sh,
-    
         LoadedGroups: make(map[string]*SessionKeyGroup),
     };
 }

@@ -24,6 +24,10 @@ func NewConnection(Router *Router, sh *SessionHandler, SenderId string, req_addr
     //req.SetSockOptInt(zmq.RCVTIMEO, 1000);
     Rsp.SetSockOptString(zmq.IDENTITY, SenderId);
 
+    if sh == nil {
+        sh = NewSessionHandler();
+    }
+
     return &Connection{
         Ctx:Ctx,
         Req:Req,
@@ -74,7 +78,7 @@ func (conn *Connection) Parse(msg string) *Request {
         }
     }
 
-    return NewRequest(*conn.SessionHandler, splitdata[0], splitdata[1], splitdata[2], body, conn, headerary);
+    return NewRequest(conn.SessionHandler, splitdata[0], splitdata[1], splitdata[2], body, conn, headerary);
 }
 
 
