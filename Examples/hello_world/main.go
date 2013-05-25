@@ -1,16 +1,16 @@
 package main
 
 import "fmt";
-import "regexp";
 import "bytes";
+import "regexp";
 import "../../Mongrel2/";
 
 func main() {
     r := m2go.Router{};
 
-    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/$`),Handler:SayHello});
-    r.AddRoute(m2go.Route{Path:regexp.MustCompile(`^/([[:alpha:]]*)$`),Handler:SayHelloWithName});
-    r.NotFound = ErrorNotFound;
+    r.AddRoute(m2go.NewRouteLiteral("/", SayHello));
+    r.AddRoute(m2go.NewRouteRegexp(regexp.MustCompile(`^/([[:alpha:]]*)$`),SayHelloWithName));
+    r.AddRoute(m2go.NewRouteAll(ErrorNotFound));
 
     conn := *m2go.NewConnection(&r,nil,"82209006-86FF-4982-B5EA-D1E29E55D481", "tcp://127.0.0.1:9997", "tcp://127.0.0.1:9996");
     conn.StartServer();

@@ -1,8 +1,7 @@
 package m2go;
 
 type Router struct {
-     Routes []Route;
-     NotFound func(*Request);
+     Routes []*Route;
 };
 
 func NewRouter() *Router {
@@ -10,16 +9,13 @@ func NewRouter() *Router {
 }
 
 func (r *Router) Handle(req *Request) {
-    for i,_ := range r.Routes {
-        if r.Routes[i].Path.MatchString(req.Path) {
-            matches := r.Routes[i].Path.FindAllStringSubmatch(req.Path,-1);
-            req.URLArgs = matches;
-            r.Routes[i].Handler(req);
+    for _,route := range r.Routes {
+        matches,urlargs := route.Test(req.Path);
+        if matches {
+            req.URLArgs = urlargs;
+            route.Handle(req);
             return;
         }
-    }
-    if r.NotFound != nil {
-        r.NotFound(req);
     }
 }
 

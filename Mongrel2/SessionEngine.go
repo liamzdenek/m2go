@@ -12,8 +12,6 @@ type SessionEngine interface {
 type SessionEngineClientUnsecure struct {}
 
 func (se *SessionEngineClientUnsecure) Load(req *Request, key string) (bool, *SessionKeyGroup) {
-    fmt.Printf("%s\n", "Load Client Unsecure");
-
     var cookie string;
     for _,value := range req.Headers["cookie"] {
         parts := strings.SplitN(value, "=", 2);

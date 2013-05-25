@@ -1,8 +1,6 @@
 package m2go;
 
-import "regexp";
-
-type Route struct {
-    Path   *regexp.Regexp;
-    Handler func(*Request);
-};
+type Route interface {
+    Test(string) (bool,[][]string);
+    Handle(*Request);
+}
